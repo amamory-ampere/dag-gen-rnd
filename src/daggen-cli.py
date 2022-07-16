@@ -130,19 +130,22 @@ if __name__ == "__main__":
             for k, v in c_.items():
                 new_c[k] = max(int(v * 0.9), 1)
                 new_c_ns[k] = random.randint(0, int(v * 0.1))
-            for key,value in new_c.items():
-                print(key, ':', value)
-            for key,value in new_c_ns.items():
-                print(key, ':', value)
+            # for key,value in new_c.items():
+            #     print(key, ':', value)
+            # for key,value in new_c_ns.items():
+            #     print(key, ':', value)
             
             nx.set_node_attributes(G.get_graph(), new_c, 'C')
             nx.set_node_attributes(G.get_graph(), new_c_ns, 'C_ns')
 
             # set execution times on edges
             w_e = {}
+            # for e in G.get_graph().edges():
+            #     ccc = new_c[e[0]] + new_c_ns[e[0]]
+            #     w_e[e] = ccc
+            # the edges noe represent the max number of bytes sent between sender/receiver
             for e in G.get_graph().edges():
-                ccc = c_[e[0]]
-                w_e[e] = ccc
+                w_e[e] = random.randint(1,dag_config["max_bytes"])            
 
             nx.set_edge_attributes(G.get_graph(), w_e, 'label')
 
