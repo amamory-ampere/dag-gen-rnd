@@ -107,7 +107,9 @@ if __name__ == "__main__":
 
         for i in tqdm(range(n)):
             # create a new DAG
-            G = DAG(i=i, U=-1, T=-1, W=w)
+            G = DAG(i=i, U=-1, T=-1, W=w, 
+                period = dag_config["period"],
+                deadline = dag_config["deadline"])
             G.gen_rnd(parallelism=dag_config["parallelism"],
                       layer_num_min=dag_config["layer_num_min"],
                       layer_num_max=dag_config["layer_num_max"],

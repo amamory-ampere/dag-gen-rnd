@@ -42,10 +42,9 @@ Install dependencies using apt:
 Execute these commands to create a python virtual environment:
 
 ```
-&> sudo apt-get install python3-venv
+&> pip3 install env
 &> python3 -m venv env
 &> source env/bin/activate
-&> pip install wheel
 &> python3 -m pip install --upgrade pip
 &> python3 -m pip install --upgrade Pillow
 &> pip3 install -r requirements.txt
@@ -64,7 +63,7 @@ Use the configuration file `config.json` to configure parameters.
 To generate single DAG task, set `multi-DAG`=`false`, then in `single_task`:
 
 - `multi-DAG`: false
-- `set_number`: number of tasksets
+- `set_number`: number of dags to be generated
 - `workload`: sum(C_i)
 
 To generate multi-DAG taskset, set `multi-DAG`=`true`, then in `multi_task`:

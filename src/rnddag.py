@@ -57,13 +57,15 @@ class DAGTaskset:
 
 # Class: DAG (Directed Acyclic Graph Task)
 class DAG:
-    def __init__(self, i=0, U=-1, T=-1, W=-1):
+    def __init__(self, i=0, U=-1, T=-1, W=-1, period=-1, deadline=-1):
         # parameters (or use default)
         self.task_num = i
         self.name = 'Tau_{:d}'.format(i)
         self.U = U
         self.T = T
         self.W = W
+        self.period = period
+        self.deadline = deadline
         self.L = -1 # needs to be computed later
 
         # configs for gen_nfj()
@@ -182,7 +184,7 @@ class DAG:
         nodes_orphan = []   # nodes without any parent
 
         # initial a new graph
-        G = nx.DiGraph(Index=self.task_num, U=self.U, T=self.T, W=self.W)
+        G = nx.DiGraph(Index=self.task_num, U=self.U, T=self.T, W=self.W, period=self.period, deadline=self.deadline)
 
         # add the root node
         n = 1
@@ -378,7 +380,7 @@ class DAG:
             os.makedirs(basefolder)
 
         # save graph (png)
-        A.draw(basefolder + self.name + '.png', format="png")
+        # A.draw(basefolder + self.name + '.png', format="png")
         
         # save graph (gpickle)
         #nx.write_gpickle(self.G, basefolder + self.name + '.gpickle')

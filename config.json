@@ -14,10 +14,12 @@
     "periods": [1000, 2000, 5000, 10000, 20000, 50000]
   },
   "single_task": {
-    "set_number": 1000,
+    "set_number": 10,
     "workload": 10000
   },
   "dag_config": {
+    "period": 10000,
+    "deadline": 10000,
     "parallelism": 5,
     "layer_num_min": 3,
     "layer_num_max": 8,
