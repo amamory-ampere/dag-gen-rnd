@@ -184,7 +184,8 @@ class DAG:
         nodes_orphan = []   # nodes without any parent
 
         # initial a new graph
-        G = nx.DiGraph(Index=self.task_num, U=self.U, T=self.T, W=self.W, period=self.period, deadline=self.deadline)
+        # G = nx.DiGraph(Index=self.task_num, U=self.U, T=self.T, W=self.W, period=self.period, deadline=self.deadline)
+        G = nx.DiGraph(Index=self.task_num, period=self.period, deadline=self.deadline)
 
         # add the root node
         n = 1

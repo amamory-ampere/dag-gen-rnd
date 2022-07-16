@@ -119,7 +119,24 @@ if __name__ == "__main__":
             n_nodes = G.get_number_of_nodes()
             dummy = config["misc"]["dummy_source_and_sink"]
             c_ = gen_execution_times(n_nodes, w, round_c=True, dummy=dummy)
-            nx.set_node_attributes(G.get_graph(), c_, 'C')
+            # reduce C by 10 % to be able to add a random C_ns (non scalable C) 
+            # we have to distribute the original value of C bewtween the new C and C_ns
+            c_ns_ = {key: value for key, value in c_.items()}
+            # print (type(c_))
+            # for key,value in c_.items():
+            #     print(key, ':', value)
+            new_c = {}
+            new_c_ns = {}
+            for k, v in c_.items():
+                new_c[k] = max(int(v * 0.9), 1)
+                new_c_ns[k] = random.randint(0, int(v * 0.1))
+            for key,value in new_c.items():
+                print(key, ':', value)
+            for key,value in new_c_ns.items():
+                print(key, ':', value)
+            
+            nx.set_node_attributes(G.get_graph(), new_c, 'C')
+            nx.set_node_attributes(G.get_graph(), new_c_ns, 'C_ns')
 
             # set execution times on edges
             w_e = {}
