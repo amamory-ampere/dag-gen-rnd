@@ -381,10 +381,13 @@ class DAG:
         A.draw(basefolder + self.name + '.png', format="png")
         
         # save graph (gpickle)
-        nx.write_gpickle(self.G, basefolder + self.name + '.gpickle')
+        #nx.write_gpickle(self.G, basefolder + self.name + '.gpickle')
         
         # save graph (gml)
-        nx.write_gml(self.G, basefolder + self.name + '.gml')
+        #nx.write_gml(self.G, basefolder + self.name + '.gml')
+
+        # save dot
+        nx.drawing.nx_agraph.write_dot(self.G, basefolder + self.name + '.dot')
 
     def load(self, basefolder="./data/"):
         pass

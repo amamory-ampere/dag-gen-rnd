@@ -39,9 +39,17 @@ Install dependencies using apt:
 
 `$ sudo apt install python3-dev graphviz libgraphviz-dev pkg-config`
 
-and then install Python depedencies through `requirements.txt`:
+Execute these commands to create a python virtual environment:
 
-`$ pip3 install -r requirements.txt`
+```
+&> sudo apt-get install python3-venv
+&> python3 -m venv env
+&> source env/bin/activate
+&> pip install wheel
+&> python3 -m pip install --upgrade pip
+&> python3 -m pip install --upgrade Pillow
+&> pip3 install -r requirements.txt
+```
 
 (Optional) To use the GUI, you need to install Qt5 for python:
 

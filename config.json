@@ -1,14 +1,14 @@
 {
   "misc": {
-    "multi-DAG": true,
+    "multi-DAG": false,
     "cores": 4,
-    "print_DAG": true,
+    "print_DAG": false,
     "save_to_file": true,
-    "dummy_source_and_sink": false,
+    "dummy_source_and_sink": true,
     "rnd_seed": 1234
   },
   "multi_task": {
-    "set_number": 10,
+    "set_number": 1,
     "task_number_per_set": 5,
     "utilization": 0.8,
     "periods": [1000, 2000, 5000, 10000, 20000, 50000]
