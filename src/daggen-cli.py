@@ -199,7 +199,7 @@ if __name__ == "__main__":
                     c_e[e] = 'black'
             nx.set_edge_attributes(G.get_graph(), c_e, 'color')
 
-            # save the criticalpath lenght into the dag for debug purporses
+            # save the dag critical path lenght into the dag for debug purporses
             G.get_graph().graph['critical_path_length'] = critical_length
 
             # print internal data

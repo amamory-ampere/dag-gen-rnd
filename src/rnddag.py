@@ -248,6 +248,10 @@ class DAG:
             G.add_edge(1, i)
             nodes_orphan.remove(i)
 
+        # make sure that there is no edge between the start and end tasks
+        if G.has_edge(1,len(G.nodes)):
+            G.remove_edge(1,len(G.nodes))
+
         # (optional) mutate a node to be conditional
         # G.add_node('2', style='filled', fillcolor='red', shape='diamond')
 
