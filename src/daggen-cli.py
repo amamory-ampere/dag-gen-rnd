@@ -31,6 +31,39 @@ def parse_configuration(config_path):
 def print_usage_info():
     logging.info("[Usage] python3 daggen-cli.py --config config_file")
 
+# return the path and the path lenght with the longest C+C_ns
+# which corresponds to the DAG critial path
+def longest_dag_path(graph, s):
+    #print (graph.in_degree(s))
+    assert(graph.in_degree(s) == 0)
+    dist = dict.fromkeys(graph.nodes, -float('inf'))
+    dist[s] = 0
+    weight = dict.fromkeys(graph.nodes, 0)
+    nx.set_node_attributes(graph, weight, 'weight')
+    nx.set_node_attributes(graph, weight, 'longest')
+    topo_order = nx.topological_sort(graph)
+    for n in topo_order:
+        for s in graph.successors(n):
+            if graph.nodes[s]['C'] + graph.nodes[s]['C_ns'] + graph.nodes[n]['weight'] > graph.nodes[s]['weight']:
+                graph.nodes[s]['weight'] = graph.nodes[s]['C'] + graph.nodes[s]['C_ns'] + graph.nodes[n]['weight']
+                graph.nodes[s]['longest'] = n
+
+            # if dist[s] < dist[n] + graph.nodes[s]['C'] + graph.nodes[s]['C_ns']:
+            #     dist[s] = dist[n] + graph.nodes[s]['C'] + graph.nodes[s]['C_ns']
+    longest_path_lenght = graph.nodes[G.get_number_of_nodes()]['weight']
+    # start w the last node
+    latest_node = G.get_number_of_nodes()
+    assert(graph.out_degree(latest_node) == 0)
+    longest_path = [latest_node]
+    while(1):
+        previous_node = graph.nodes[longest_path[0]]['longest']
+        assert(previous_node>0)
+        longest_path.insert(0,previous_node)
+        # until it reaches the initial node
+        if graph.in_degree(previous_node) == 0:
+            break
+
+    return (longest_path_lenght,longest_path)
 
 if __name__ == "__main__":
     ############################################################################
@@ -143,7 +176,7 @@ if __name__ == "__main__":
             # for e in G.get_graph().edges():
             #     ccc = new_c[e[0]] + new_c_ns[e[0]]
             #     w_e[e] = ccc
-            # the edges noe represent the max number of bytes sent between sender/receiver
+            # the edges now represent the max number of bytes sent between sender/receiver
             for e in G.get_graph().edges():
                 if e[0] == 1 or e[1] == n_nodes:
                     w_e[e] = 1
@@ -151,6 +184,22 @@ if __name__ == "__main__":
                     w_e[e] = random.randint(1,dag_config["max_bytes"])            
 
             nx.set_edge_attributes(G.get_graph(), w_e, 'label')
+
+            # calculate the longest path assuming C+C_ns
+            [critical_length, critical_path] = longest_dag_path(G.get_graph(), 1)
+            # print ('path:', critical_path, 'has lenght:',critical_length)
+            # ignore the graph if it violated the end-to-end dag deadline
+            if critical_length > dag_config["deadline"]:
+                continue
+            
+            # set the edge colors to indicate the dag critical path
+            c_e = {}
+            for e in G.get_graph().edges():
+                if e[0] in critical_path and e[1] in critical_path:
+                    c_e[e] = 'red'
+                else:
+                    c_e[e] = 'black'
+            nx.set_edge_attributes(G.get_graph(), c_e, 'color')
 
             # print internal data
             if config["misc"]["print_DAG"]:
