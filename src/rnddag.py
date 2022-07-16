@@ -392,6 +392,8 @@ class DAG:
         # save dot
         nx.drawing.nx_agraph.write_dot(self.G, basefolder + self.name + '.dot')
 
+        # save yaml 
+
     def load(self, basefolder="./data/"):
         pass
 

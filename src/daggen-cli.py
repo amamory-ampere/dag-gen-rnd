@@ -145,7 +145,10 @@ if __name__ == "__main__":
             #     w_e[e] = ccc
             # the edges noe represent the max number of bytes sent between sender/receiver
             for e in G.get_graph().edges():
-                w_e[e] = random.randint(1,dag_config["max_bytes"])            
+                if e[0] == 1 or e[1] == n_nodes:
+                    w_e[e] = 1
+                else:
+                    w_e[e] = random.randint(1,dag_config["max_bytes"])            
 
             nx.set_edge_attributes(G.get_graph(), w_e, 'label')
 
