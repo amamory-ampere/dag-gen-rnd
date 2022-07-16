@@ -48,8 +48,6 @@ def longest_dag_path(graph, s):
                 graph.nodes[s]['weight'] = graph.nodes[s]['C'] + graph.nodes[s]['C_ns'] + graph.nodes[n]['weight']
                 graph.nodes[s]['longest'] = n
 
-            # if dist[s] < dist[n] + graph.nodes[s]['C'] + graph.nodes[s]['C_ns']:
-            #     dist[s] = dist[n] + graph.nodes[s]['C'] + graph.nodes[s]['C_ns']
     longest_path_lenght = graph.nodes[G.get_number_of_nodes()]['weight']
     # start w the last node
     latest_node = G.get_number_of_nodes()
@@ -200,6 +198,9 @@ if __name__ == "__main__":
                 else:
                     c_e[e] = 'black'
             nx.set_edge_attributes(G.get_graph(), c_e, 'color')
+
+            # save the criticalpath lenght into the dag for debug purporses
+            G.get_graph().graph['critical_path_length'] = critical_length
 
             # print internal data
             if config["misc"]["print_DAG"]:
