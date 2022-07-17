@@ -135,6 +135,7 @@ if __name__ == "__main__":
     if not multi_dag:
         n = config["single_task"]["set_number"]
         w = config["single_task"]["workload"]
+        assert(dag_config["period"]>=dag_config["deadline"])
 
         for i in tqdm(range(n)):
             # create a new DAG
