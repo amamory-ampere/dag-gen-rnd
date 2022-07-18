@@ -37,7 +37,7 @@ The utilization generation is based on:
 
 Install dependencies using apt:
 
-`$ sudo apt install python3-dev graphviz libgraphviz-dev pkg-config`
+`$ sudo apt install python3-dev graphviz libgraphviz-dev pkg-config xdot`
 
 Execute these commands to create a python virtual environment:
 

@@ -19,6 +19,13 @@ from random import seed, randint, random
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
+### ATTENTION !!! These are the same values used by dag.c and the heuristics
+# https://github.com/ampere/power-aware-optimization/blob/dev/common/include/common.h#L5-L6
+# https://github.com/ampere/power-aware-optimization/blob/dev/dag/dag.h#L13
+# make sure to keep them in sync
+MAX_TASKS_PER_DAG = 32
+MAX_PREV = 8
+MAX_NEXT = 8
 
 # Class: DAGTaskset
 class DAGTaskset:
@@ -176,6 +183,7 @@ class DAG:
         # return the graph
         self.G = G
 
+    # return the dag if it's valid. Otherwise return None
     def gen_rnd(self, parallelism=8, layer_num_min=5, layer_num_max=12, connect_prob=0.5):
         # data structures
         nodes = []          # nodes in all layers (in form of shape decomposition)
@@ -252,14 +260,27 @@ class DAG:
         if G.has_edge(1,len(G.nodes)):
             G.remove_edge(1,len(G.nodes))
 
+        invalid_dag = False
+        if len(G.nodes) > MAX_TASKS_PER_DAG:
+            invalid_dag = True
+        # make sure the nodes have up to the max arity
+        for n in G.nodes():
+            if G.in_degree(n) > MAX_PREV:
+                invalid_dag = True
+            if G.out_degree(n) > MAX_NEXT:
+                invalid_dag = True
+
         # (optional) mutate a node to be conditional
         # G.add_node('2', style='filled', fillcolor='red', shape='diamond')
 
         #print(nodes)
         #print(nodes_orphan)
         
-        # return the graph
-        self.G = G
+        # return the graph. skip invalid dags
+        if not invalid_dag:
+            self.G = G
+        else:
+            self.G = None
 
     def gen_nfj(self):
         """ Generate Nested Fork-Join DAG

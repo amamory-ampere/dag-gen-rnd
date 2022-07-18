@@ -147,6 +147,10 @@ if __name__ == "__main__":
                       layer_num_max=dag_config["layer_num_max"],
                       connect_prob=dag_config["connect_prob"])
 
+            # skip invalid dags
+            if G.get_graph()== None:
+                continue
+                
             # generate sub-DAG execution times
             n_nodes = G.get_number_of_nodes()
             dummy = config["misc"]["dummy_source_and_sink"]
