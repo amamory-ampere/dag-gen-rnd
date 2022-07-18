@@ -42,12 +42,12 @@ Install dependencies using apt:
 Execute these commands to create a python virtual environment:
 
 ```
-&> pip3 install env
-&> python3 -m venv env
-&> source env/bin/activate
-&> python3 -m pip install --upgrade pip
-&> python3 -m pip install --upgrade Pillow
-&> pip3 install -r requirements.txt
+$> pip3 install env
+$> python3 -m venv env
+$> source env/bin/activate
+$> python3 -m pip install --upgrade pip
+$> python3 -m pip install --upgrade Pillow
+$> pip3 install -r requirements.txt
 ```
 
 (Optional) To use the GUI, you need to install Qt5 for python:
