@@ -196,7 +196,7 @@ class DAG:
         G = nx.DiGraph(Index=self.task_num, period=self.period, deadline=self.deadline)
 
         # add the root node
-        n = 1
+        n = 0
         G.add_node(n, rank=0)
         nodes.append([n])
         nodes_parent.append(n)
@@ -238,7 +238,7 @@ class DAG:
 
             # connect all orphan to the root node
             for i in nodes_orphan.copy():
-                G.add_edge(1, i)
+                G.add_edge(0, i)
                 nodes_orphan.remove(i)
                 # if i in nodes_parent:
                 #     nodes_parent.remove(i)
@@ -253,12 +253,12 @@ class DAG:
 
         # connect all orphan to the root node
         for i in nodes_orphan.copy():
-            G.add_edge(1, i)
+            G.add_edge(0, i)
             nodes_orphan.remove(i)
 
         # make sure that there is no edge between the start and end tasks
-        if G.has_edge(1,len(G.nodes)):
-            G.remove_edge(1,len(G.nodes))
+        if G.has_edge(0,len(G.nodes)-1):
+            G.remove_edge(0,len(G.nodes)-1)
 
         invalid_dag = False
         if len(G.nodes) > MAX_TASKS_PER_DAG:
@@ -276,6 +276,13 @@ class DAG:
         #print(nodes)
         #print(nodes_orphan)
         
+        # print ("n nodes:", len(G.nodes))
+        # for n,data in G.nodes(data=True):
+        #     print (n,":", data)
+        #     # for s,t,edata in G.out_degree(n,data=True):
+        #     for s,t,edata in G.edges(n,data=True):
+        #         print (" - ", s,t, edata)
+
         # return the graph. skip invalid dags
         if not invalid_dag:
             self.G = G
@@ -404,6 +411,11 @@ class DAG:
         # create basefolder (if not exists)
         if not os.path.exists(basefolder):
             os.makedirs(basefolder)
+
+        # remove the auxiliar task attributes 'longest' and 'weight'
+        for _,data in self.G.nodes(data=True):
+            del data['longest']
+            del data['weight']
 
         # save graph (png)
         # A.draw(basefolder + self.name + '.png', format="png")

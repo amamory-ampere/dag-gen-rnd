@@ -98,11 +98,10 @@ def gen_execution_times(n, w, round_c=False, dummy=False):
 
         for i in range(n):
             if round_c == False:
-                # +1 as node number starts from 1, not 0
-                c_dict[i + 1] = c_set[i] / f
+                c_dict[i] = c_set[i] / f
             else:
                 # round the value to integer but should be more than 1!
-                c_dict[i + 1] = max(round(c_set[i] / f), 1)
+                c_dict[i] = max(round(c_set[i] / f), 1)
 
     else:
         # a dummy source / sink node only has unit execution times
@@ -119,19 +118,18 @@ def gen_execution_times(n, w, round_c=False, dummy=False):
         f = w_p / w
 
         # dummy source node
-        c_dict[1] = 1
+        c_dict[0] = 0
 
         for i in range(n - 2):
             if round_c == False:
-                # +1 as node number starts from 1, not 0
                 # +1 more as the source node is skipped
-                c_dict[i + 1 + 1] = c_set[i] / f
+                c_dict[i + 1] = c_set[i] / f
             else:
                 # round the value to integer but should be more than 1!
-                c_dict[i + 1 + 1] = max(round(c_set[i] / f), 1)
+                c_dict[i + 1] = max(round(c_set[i] / f), 1)
 
         # dummy sink node
-        c_dict[n] = 1
+        c_dict[n-1] = 0
 
     return c_dict
 
