@@ -9,11 +9,11 @@
   },
   "single_task": {
     "set_number": 10,
-    "workload": 10000
+    "workload": 500000
   },
   "dag_config": {
-    "period": 10000,
-    "deadline": 10000,
+    "period": 500000,
+    "deadline": 500000,
     "max_bytes": 256,
     "parallelism": 5,
     "layer_num_min": 3,

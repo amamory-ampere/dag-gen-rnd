@@ -101,7 +101,8 @@ def gen_execution_times(n, w, round_c=False, dummy=False):
                 c_dict[i] = c_set[i] / f
             else:
                 # round the value to integer but should be more than 1!
-                c_dict[i] = max(round(c_set[i] / f), 1)
+                # sched deadline does not accept a task runtime < 1024
+                c_dict[i] = 1024 + max(round(c_set[i] / f), 1)
 
     else:
         # a dummy source / sink node only has unit execution times
