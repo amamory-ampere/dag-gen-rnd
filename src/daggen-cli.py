@@ -11,7 +11,7 @@
 import os, sys, logging, getopt, time, json
 import networkx as nx
 import random
-from tqdm import tqdm
+#from tqdm import tqdm
 
 from rnddag import DAG, DAGTaskset
 from generator import uunifast_discard, uunifast
@@ -140,7 +140,9 @@ if __name__ == "__main__":
         w = config["single_task"]["workload"]
         assert(dag_config["period"]>=dag_config["deadline"])
 
-        for i in tqdm(range(n)):
+        # for i in tqdm(range(n)):
+        i=0
+        while i < n:
             # create a new DAG
             G = DAG(i=i, U=-1, T=-1, W=w, 
                 period = dag_config["period"],
@@ -217,6 +219,7 @@ if __name__ == "__main__":
             # save graph
             if config["misc"]["save_to_file"]:
                 G.save(basefolder="./data/")
+            i+=1
 
     ############################################################################
     # II. multi-DAG generation
