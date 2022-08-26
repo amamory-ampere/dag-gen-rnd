@@ -67,7 +67,7 @@ class DAG:
     def __init__(self, i=0, U=-1, T=-1, W=-1, period=-1, deadline=-1):
         # parameters (or use default)
         self.task_num = i
-        self.name = 'Tau{:d}'.format(i)
+        self.name = 'Tau{:03d}'.format(i)
         self.U = U
         self.T = T
         self.W = W
