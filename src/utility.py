@@ -13,7 +13,7 @@ import networkx as nx
 
 def load_task(task_idx, dag_base_folder = "../data/"):
     # << load DAG task <<
-    dag_task_file = dag_base_folder + "Tau_{:d}.gpickle".format(task_idx)
+    dag_task_file = dag_base_folder + "Tau{:d}.gpickle".format(task_idx)
 
     # task is saved as NetworkX gpickle format
     G = nx.read_gpickle(dag_task_file)
