@@ -64,15 +64,18 @@ class DAGTaskset:
 
 # Class: DAG (Directed Acyclic Graph Task)
 class DAG:
-    def __init__(self, i=0, U=-1, T=-1, W=-1, period=-1, deadline=-1):
+    def __init__(self, i=0, U=-1, T=-1, max_period=-1):# W=-1 , period=-1, deadline=-1):
         # parameters (or use default)
         self.task_num = i
         self.name = 'Tau{:03d}'.format(i)
         self.U = U
         self.T = T
-        self.W = W
-        self.period = period
-        self.deadline = deadline
+        #self.W = W
+        # randomize the period from 1*10 to 30*10 ms. if max_period is 100ms, then the range is 10 to 100 ms 
+        self.period = randint(1, min(30,max_period/10000000)) * 10000000
+        # later the task wcet is set based on rnd number normalized by this period
+        # and, finally, there is a critical path test to check wheter the critical path is < the deadline
+        self.deadline = self.period
         self.L = -1 # needs to be computed later
 
         # configs for gen_nfj()
@@ -88,6 +91,12 @@ class DAG:
 
     def get_graph(self):
         return self.G
+
+    def get_graph_period(self):
+        return self.period
+
+    def get_graph_deadline(self):
+        return self.deadline
 
     def get_number_of_nodes(self):
         return self.G.number_of_nodes()

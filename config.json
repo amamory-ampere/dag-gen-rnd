@@ -8,16 +8,14 @@
     "rnd_seed": 1234
   },
   "single_task": {
-    "set_number": 10,
-    "workload": 100000000
+    "set_number": 10
   },
   "dag_config": {
-    "period": 80000000,
-    "deadline": 80000000,
+    "max_period":  100000000,
     "max_bytes": 256,
-    "parallelism": 5,
+    "parallelism": 3,
     "layer_num_min": 3,
-    "layer_num_max": 8,
-    "connect_prob": 0.5
+    "layer_num_max": 4,
+    "connect_prob": 0.3
   }
 }

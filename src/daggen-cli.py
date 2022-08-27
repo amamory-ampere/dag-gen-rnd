@@ -137,16 +137,17 @@ if __name__ == "__main__":
     ############################################################################
     if not multi_dag:
         n = config["single_task"]["set_number"]
-        w = config["single_task"]["workload"]
-        assert(dag_config["period"]>=dag_config["deadline"])
+        # w = config["single_task"]["workload"]
 
         # for i in tqdm(range(n)):
         i=0
         while i < n:
             # create a new DAG
-            G = DAG(i=i, U=-1, T=-1, W=w, 
-                period = dag_config["period"],
-                deadline = dag_config["deadline"])
+            G = DAG(i=i, U=-1, T=-1,
+                max_period = dag_config["max_period"])
+                #W=w, 
+                # min_period = dag_config["min_period"],
+                #deadline = dag_config["deadline"])
             G.gen_rnd(parallelism=dag_config["parallelism"],
                       layer_num_min=dag_config["layer_num_min"],
                       layer_num_max=dag_config["layer_num_max"],
@@ -159,21 +160,12 @@ if __name__ == "__main__":
             # generate sub-DAG execution times
             n_nodes = G.get_number_of_nodes()
             dummy = config["misc"]["dummy_source_and_sink"]
-            c_ = gen_execution_times(n_nodes, w, round_c=True, dummy=dummy)
+            c_ = gen_execution_times(n_nodes, G.get_graph_period(), round_c=True, dummy=dummy)
             # C_ns is set to be up to 10% of C
             c_ns_ = {key: random.randint(0, int(value * 0.1)) for key, value in c_.items()}
             # print (type(c_))
             # for key,value in c_.items():
             #     print(key, ':', value)
-            # new_c = {}
-            # new_c_ns = {}
-            # for k, v in c_.items():
-            #     new_c[k] = max(int(v * 0.9), 0)
-            #     new_c_ns[k] = random.randint(0, int(v * 0.1))
-            # # for key,value in new_c.items():
-            # #     print(key, ':', value)
-            # # for key,value in new_c_ns.items():
-            # #     print(key, ':', value)
             
             nx.set_node_attributes(G.get_graph(), c_, 'C')
             nx.set_node_attributes(G.get_graph(), c_ns_, 'C_ns')
@@ -193,7 +185,7 @@ if __name__ == "__main__":
             [critical_length, critical_path] = longest_dag_path(G.get_graph())
             # print ('path:', critical_path, 'has lenght:',critical_length)
             # ignore the graph if it violated the end-to-end dag deadline
-            if critical_length > dag_config["deadline"]:
+            if critical_length > G.get_graph_deadline():
                 continue
             
             # set the edge colors to indicate the dag critical path
