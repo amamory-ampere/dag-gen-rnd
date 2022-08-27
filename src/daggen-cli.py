@@ -31,7 +31,7 @@ def parse_configuration(config_path):
 def print_usage_info():
     logging.info("[Usage] python3 daggen-cli.py --config config_file")
 
-# return the path and the path lenght with the longest C+C_ns
+# return the path and the path lenght with the longest C
 # which corresponds to the DAG critial path
 def longest_dag_path(graph):
     assert(graph.in_degree(0) == 0)
@@ -47,8 +47,8 @@ def longest_dag_path(graph):
     topo_order = nx.topological_sort(graph)
     for n in topo_order:
         for s in graph.successors(n):
-            if graph.nodes[s]['C'] + graph.nodes[s]['C_ns'] + graph.nodes[n]['weight'] > graph.nodes[s]['weight']:
-                graph.nodes[s]['weight'] = graph.nodes[s]['C'] + graph.nodes[s]['C_ns'] + graph.nodes[n]['weight']
+            if graph.nodes[s]['C'] + graph.nodes[n]['weight'] > graph.nodes[s]['weight']:
+                graph.nodes[s]['weight'] = graph.nodes[s]['C'] + graph.nodes[n]['weight']
                 graph.nodes[s]['longest'] = n
 
     longest_path_lenght = graph.nodes[G.get_number_of_nodes()-1]['weight']
@@ -160,24 +160,23 @@ if __name__ == "__main__":
             n_nodes = G.get_number_of_nodes()
             dummy = config["misc"]["dummy_source_and_sink"]
             c_ = gen_execution_times(n_nodes, w, round_c=True, dummy=dummy)
-            # reduce C by 10 % to be able to add a random C_ns (non scalable C) 
-            # we have to distribute the original value of C bewtween the new C and C_ns
-            c_ns_ = {key: value for key, value in c_.items()}
+            # C_ns is set to be up to 10% of C
+            c_ns_ = {key: random.randint(0, int(value * 0.1)) for key, value in c_.items()}
             # print (type(c_))
             # for key,value in c_.items():
             #     print(key, ':', value)
-            new_c = {}
-            new_c_ns = {}
-            for k, v in c_.items():
-                new_c[k] = max(int(v * 0.9), 0)
-                new_c_ns[k] = random.randint(0, int(v * 0.1))
-            # for key,value in new_c.items():
-            #     print(key, ':', value)
-            # for key,value in new_c_ns.items():
-            #     print(key, ':', value)
+            # new_c = {}
+            # new_c_ns = {}
+            # for k, v in c_.items():
+            #     new_c[k] = max(int(v * 0.9), 0)
+            #     new_c_ns[k] = random.randint(0, int(v * 0.1))
+            # # for key,value in new_c.items():
+            # #     print(key, ':', value)
+            # # for key,value in new_c_ns.items():
+            # #     print(key, ':', value)
             
-            nx.set_node_attributes(G.get_graph(), new_c, 'C')
-            nx.set_node_attributes(G.get_graph(), new_c_ns, 'C_ns')
+            nx.set_node_attributes(G.get_graph(), c_, 'C')
+            nx.set_node_attributes(G.get_graph(), c_ns_, 'C_ns')
 
             # set execution times on edges
             w_e = {}
@@ -186,14 +185,11 @@ if __name__ == "__main__":
             #     w_e[e] = ccc
             # the edges now represent the max number of bytes sent between sender/receiver
             for e in G.get_graph().edges():
-                if e[0] == 0 or e[1] == n_nodes-1:
-                    w_e[e] = 1
-                else:
-                    w_e[e] = random.randint(1,dag_config["max_bytes"])            
+                w_e[e] = random.randint(1,dag_config["max_bytes"])
 
             nx.set_edge_attributes(G.get_graph(), w_e, 'label')
 
-            # calculate the longest path assuming C+C_ns.
+            # calculate the longest path assuming C
             [critical_length, critical_path] = longest_dag_path(G.get_graph())
             # print ('path:', critical_path, 'has lenght:',critical_length)
             # ignore the graph if it violated the end-to-end dag deadline
