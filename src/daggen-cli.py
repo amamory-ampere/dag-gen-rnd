@@ -40,6 +40,8 @@ def longest_dag_path(graph):
     weight = dict.fromkeys(graph.nodes, 0)
     nx.set_node_attributes(graph, weight, 'weight')
     nx.set_node_attributes(graph, weight, 'longest')
+    # initialize the weight of the 1st node
+    graph.nodes[0]['weight'] = graph.nodes[0]['C']
     # for n,data in graph.nodes(data=True):
     #     print (n,":", data)
     #     for s,t,edata in graph.edges(n,data=True):
@@ -51,6 +53,10 @@ def longest_dag_path(graph):
                 graph.nodes[s]['weight'] = graph.nodes[s]['C'] + graph.nodes[n]['weight']
                 graph.nodes[s]['longest'] = n
 
+    # for n,data in graph.nodes(data=True):
+    #     print (n,":", data)
+    #     for s,t,edata in graph.edges(n,data=True):
+    #         print (" - ", s,t, edata)
     longest_path_lenght = graph.nodes[G.get_number_of_nodes()-1]['weight']
     # start w the last node
     latest_node = G.get_number_of_nodes()-1
@@ -143,7 +149,7 @@ if __name__ == "__main__":
         i=0
         while i < n:
             # create a new DAG
-            G = DAG(i=i, U=-1, T=-1,
+            G = DAG(i=i, U=-1, T=-1, fname = config["misc"]["fname"],
                 max_period = dag_config["max_period"])
                 #W=w, 
                 # min_period = dag_config["min_period"],

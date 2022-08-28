@@ -86,6 +86,10 @@ def gen_period(population, n):
 def gen_execution_times(n, w, round_c=False, dummy=False):
     c_set = []
 
+    # w is the dag period, used here to normalise the task runtime
+    # in this point we randomize w, otherwise it will always meet the dag period, leaving no room for optimization
+    w = w * random.uniform(0.5, 0.9)
+
     if dummy == False:
         for i in range(n):
             c = random.random()

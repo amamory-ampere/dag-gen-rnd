@@ -4,6 +4,7 @@
     "cores": 4,
     "print_DAG": false,
     "save_to_file": true,
+    "fname": "small",
     "dummy_source_and_sink": false,
     "rnd_seed": 1234
   },
