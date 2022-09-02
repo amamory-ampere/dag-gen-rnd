@@ -209,6 +209,21 @@ if __name__ == "__main__":
             # save the dag critical path lenght into the dag for debug purporses
             G.get_graph().graph['critical_path_length'] = critical_length
 
+            # select some tasks to be tagged as 'hardware accelerated', e.g. fpga or gpu
+            # and randonly select a task from the critical path to be accelerated
+            accelerated_tasks = random.randint(0, int(dag_config["max_acc"]))
+            acc_cnt =0
+            # convert the list of tuple (v,t) to a set of int representing the tasks
+            critical_path_set = set(critical_path)
+            print('critical_path_set:', accelerated_tasks, critical_path_set)
+            # keep tagging tasks in the critical path as 'accelerated' until 
+            # accelerated_tasks were marked or all  tasks of the path were marked
+            while (acc_cnt < accelerated_tasks and acc_cnt < len(critical_path_set)):
+                acc_task_id = random.choice(tuple(critical_path_set))
+                print ('acc_task_id:', acc_task_id)
+                G.get_graph().nodes[acc_task_id]['acc'] = 1
+                acc_cnt +=1
+
             # print internal data
             if config["misc"]["print_DAG"]:
                 G.print_data()
