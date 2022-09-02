@@ -167,8 +167,11 @@ if __name__ == "__main__":
             n_nodes = G.get_number_of_nodes()
             dummy = config["misc"]["dummy_source_and_sink"]
             c_ = gen_execution_times(n_nodes, G.get_graph_period(), round_c=True, dummy=dummy)
-            # C_ns is set to be up to 10% of C
-            c_ns_ = {key: random.randint(0, int(value * 0.1)) for key, value in c_.items()}
+            if dag_config["random_non_scalable_C"]:
+                # C_ns is set to be up to 10% of C
+                c_ns_ = {key: random.randint(0, int(value * 0.1)) for key, value in c_.items()}
+            else:
+                c_ns_ = {key: 0 for key, value in c_.items()}
             # print (type(c_))
             # for key,value in c_.items():
             #     print(key, ':', value)

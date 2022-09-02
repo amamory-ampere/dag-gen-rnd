@@ -14,6 +14,7 @@
   "dag_config": {
     "max_period":  100000000,
     "max_bytes": 256,
+    "random_non_scalable_C": false,
     "parallelism": 3,
     "layer_num_min": 3,
     "layer_num_max": 4,
