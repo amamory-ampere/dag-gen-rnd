@@ -215,12 +215,12 @@ if __name__ == "__main__":
             acc_cnt =0
             # convert the list of tuple (v,t) to a set of int representing the tasks
             critical_path_set = set(critical_path)
-            print('critical_path_set:', accelerated_tasks, critical_path_set)
+            #print('critical_path_set:', accelerated_tasks, critical_path_set)
             # keep tagging tasks in the critical path as 'accelerated' until 
             # accelerated_tasks were marked or all  tasks of the path were marked
             while (acc_cnt < accelerated_tasks and acc_cnt < len(critical_path_set)):
                 acc_task_id = random.choice(tuple(critical_path_set))
-                print ('acc_task_id:', acc_task_id)
+                #print ('acc_task_id:', acc_task_id)
                 G.get_graph().nodes[acc_task_id]['acc'] = 1
                 acc_cnt +=1
 
