@@ -14,7 +14,8 @@
   "dag_config": {
     "max_period":  100000000,
     "max_bytes": 1,
-    "max_acc": 2,
+    "max_acc_tasks": 2,
+    "acc_ids": [2,3],
     "random_non_scalable_C": false,
     "parallelism": 3,
     "layer_num_min": 3,

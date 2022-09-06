@@ -211,7 +211,7 @@ if __name__ == "__main__":
 
             # select some tasks to be tagged as 'hardware accelerated', e.g. fpga or gpu
             # and randonly select a task from the critical path to be accelerated
-            accelerated_tasks = random.randint(0, int(dag_config["max_acc"]))
+            accelerated_tasks = random.randint(0, int(dag_config["max_acc_tasks"]))
             acc_cnt =0
             # convert the list of tuple (v,t) to a set of int representing the tasks
             critical_path_set = set(critical_path)
@@ -221,7 +221,8 @@ if __name__ == "__main__":
             while (acc_cnt < accelerated_tasks and acc_cnt < len(critical_path_set)):
                 acc_task_id = random.choice(tuple(critical_path_set))
                 #print ('acc_task_id:', acc_task_id)
-                G.get_graph().nodes[acc_task_id]['acc'] = 1
+                # randonly select the accelerator id for this task
+                G.get_graph().nodes[acc_task_id]['acc'] = int(random.choice(tuple(dag_config["acc_ids"])))
                 acc_cnt +=1
 
             # print internal data
