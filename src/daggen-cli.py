@@ -149,7 +149,8 @@ if __name__ == "__main__":
         i=0
         while i < n:
             # create a new DAG
-            G = DAG(i=i, U=-1, T=-1, fname = config["misc"]["fname"],
+            fname_int_sufix = int(config["misc"]["fname_int_sufix"])
+            G = DAG(i=i+fname_int_sufix, U=-1, T=-1, fname = config["misc"]["fname_prefix"],
                 max_period = dag_config["max_period"])
                 #W=w, 
                 # min_period = dag_config["min_period"],
