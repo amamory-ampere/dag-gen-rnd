@@ -64,14 +64,36 @@ To generate single DAG task, set `multi-DAG`=`false`, then in `single_task`:
 
 - `multi-DAG`: false
 - `set_number`: number of dags to be generated
-- `workload`: sum(C_i)
+- `fname_prefix` and `fname_int_sufix`: the resulting filename is `fname_prefix``fname_int_sufix`. **DONT USE '-' or '_'** in the resulting filename since it will affect the automation flow.
+- `dummy_source_and_sink`: use it always false since tasks w time 0 will crash when running SCHED_DEADLINE
+- 
 
-To generate multi-DAG taskset, set `multi-DAG`=`true`, then in `multi_task`:
+When generating single DAGs:
 
-- `set_number`: number of tasksets
-- `utilization`: total utilization
-- `task_number_per_set`: number of tasks in each taskset
-- `periods`: period set candidates
+ - `max_period`:  end to end period in ns,
+ - `max_bytes`: max number of bytes send per message,
+ - `max_acc_tasks`: max number of tasks to be randomized. ,
+ - `acc_ids`: a list of int index for the accelerator island. For example, if the platform has one island of cpu and one island w acc, then the list is [1]. if there are two cpu islands (like big.little) and two accelarators, then the list is [2,3],
+ - `random_non_scalable_C`: boolean indicating whether the non scalable part of C is randomized, up to 10% the size of C. If false, it will be zero.
+
+## Controling the DAG size
+
+The following parameters are used to control the DAG size. First, it randomizes the number of layers in the graph, between `layer_num_min` and `layer_num_max`. Then, for each layer, it randomizes the number of nodes of the layer according to `parallelism`. The parameter `connect_prob` controls the edge density. It should be a value lower than 1.0.
+
+## Feasibility Check
+
+There is a simple feasibility generated run for the generated DAG such that this DAG is more likely, but not guaranteed,to be have a feasible task placement. This check is important, otherwise *dag-rand-gen* would generate lot's of unfeasible DAGs and we would need to manually check for each DAG if it is actually unfeasible, wasting a lot of time. With this check, the vast majority of the generated DAG is feasible. However, some DAGs, specially for bigger DAGS with more tasks then the number of cores, could be unfeasible. 
+
+The process is like this. After the DAG structure is defined, there is a step that assigns random runtime to the tasks. The sum of the tasks runtime is then normalized according to the DAG period `max_period`.
+All times are assuming that their **tasks are placed on a CPU island with capacity 1.0**. Note that, when running the optimization, the platform model must include a CPU island with capacity 1.0. Otherwise, the random dag generator would require additional inputs, like the capacity of all platform island, making it more complex and less reusable. 
+
+Then, assuming that all task could be placed on this island with capacity 1.0, which is obvioulsy a simplistic assumption, it calculates the longest path in the DAG. This path must be shorted than the DAG end-to-end deadline, which is currently set equals to the DAG period `max_period`. If this is not the case, the DAG is discarded.
+
+When there are islands representing hardware accelerators, as long as the capacity for their islands is greater than 1.0
+and the accelerator does not have frequency scaling, it is guaranteed that if a task is assigned to an accelerator, 
+it's runtime will be only faster than the runtime assuming the CPU island with capacity 1.0. This way, the feasibility still holds.
+
+In the future, when the model and experimental is expanded to support frequency scaling in the hardware accelerators, it is just a matter to ensure that the task runtime assuming the accelerator at its lowest frequency is lower than the runtime assuming the CPU island with capacity 1.0.
 
 ---
 
@@ -83,12 +105,6 @@ First, change the configurations in `config.json`. Then, depending on your perfe
 
 `$ python3 src/daggen-cli.py`
 
-
-### 2. Use the graphic user interface (development in process)
-
-`$ python3 src/daggen-gui.py`
-
-To use the generated DAGs, see the provided API in `utlity.py` which also gives an example.
 
 ---
 

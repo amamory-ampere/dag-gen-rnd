@@ -142,12 +142,11 @@ if __name__ == "__main__":
     # I. single DAG generation
     ############################################################################
     if not multi_dag:
-        n = config["single_task"]["set_number"]
+        n_dags = config["single_task"]["set_number"]
         # w = config["single_task"]["workload"]
 
-        # for i in tqdm(range(n)):
         i=0
-        while i < n:
+        while i < n_dags:
             # create a new DAG
             fname_int_sufix = int(config["misc"]["fname_int_sufix"])
             G = DAG(i=i+fname_int_sufix, U=-1, T=-1, fname = config["misc"]["fname_prefix"],
@@ -162,6 +161,7 @@ if __name__ == "__main__":
 
             # skip invalid dags
             if G.get_graph()== None:
+                # print ('bad graph')
                 continue
                 
             # generate sub-DAG execution times
@@ -173,22 +173,19 @@ if __name__ == "__main__":
                 c_ns_ = {key: random.randint(0, int(value * 0.1)) for key, value in c_.items()}
             else:
                 c_ns_ = {key: 0 for key, value in c_.items()}
-            # print (type(c_))
+            # print ('nodes:', n_nodes, type(c_))
             # for key,value in c_.items():
             #     print(key, ':', value)
             
             nx.set_node_attributes(G.get_graph(), c_, 'C')
             nx.set_node_attributes(G.get_graph(), c_ns_, 'C_ns')
 
-            # set execution times on edges
+            # the edges represent the max number of bytes sent between sender/receiver
             w_e = {}
-            # for e in G.get_graph().edges():
-            #     ccc = new_c[e[0]] + new_c_ns[e[0]]
-            #     w_e[e] = ccc
-            # the edges now represent the max number of bytes sent between sender/receiver
             for e in G.get_graph().edges():
                 w_e[e] = random.randint(1,dag_config["max_bytes"])
 
+            # attribute 'label' is used to store # bytes sent due to dot. this will print te msg size when the dot is viewed
             nx.set_edge_attributes(G.get_graph(), w_e, 'label')
 
             # calculate the longest path assuming C
@@ -196,8 +193,16 @@ if __name__ == "__main__":
             # print ('path:', critical_path, 'has lenght:',critical_length)
             # ignore the graph if it violated the end-to-end dag deadline
             if critical_length > G.get_graph_deadline():
+                # print ('bad graph')
                 continue
             
+            # at this point, the graph has been approved. This is a good point to enable dgb msgs
+            print ('\ngood graph: %d' % i)
+            print ('n_nodes:', n_nodes)
+            for n, data in G.get_graph().nodes(data=True):
+                print ('node:', n, data)
+            print (nx.to_edgelist(G.get_graph()))
+
             # set the edge colors to indicate the dag critical path
             c_e = {}
             for e in G.get_graph().edges():
