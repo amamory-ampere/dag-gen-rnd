@@ -221,6 +221,10 @@ if __name__ == "__main__":
             acc_cnt =0
             # convert the list of tuple (v,t) to a set of int representing the tasks
             critical_path_set = set(critical_path)
+            assert(len(critical_path_set) >= 3)
+            # remove the 1st and last tasks. these cannot be accelerated
+            critical_path_set.remove(max(critical_path_set))
+            critical_path_set.remove(min(critical_path_set))
             #print('critical_path_set:', accelerated_tasks, critical_path_set)
             # keep tagging tasks in the critical path as 'accelerated' until 
             # accelerated_tasks were marked or all  tasks of the path were marked
