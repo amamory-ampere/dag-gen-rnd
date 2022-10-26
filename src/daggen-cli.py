@@ -167,7 +167,9 @@ if __name__ == "__main__":
             # generate sub-DAG execution times
             n_nodes = G.get_number_of_nodes()
             dummy = config["misc"]["dummy_source_and_sink"]
-            c_ = gen_execution_times(n_nodes, G.get_graph_period(), round_c=True, dummy=dummy)
+            c_ = gen_execution_times(n_nodes, G.get_graph_period(), 
+                dag_config["min_cpu_load"], dag_config["max_cpu_load"], 
+                round_c=True, dummy=dummy)
             if dag_config["random_non_scalable_C"]:
                 # C_ns is set to be up to 10% of C
                 c_ns_ = {key: random.randint(0, int(value * 0.1)) for key, value in c_.items()}
@@ -197,11 +199,11 @@ if __name__ == "__main__":
                 continue
             
             # at this point, the graph has been approved. This is a good point to enable dgb msgs
-            print ('\ngood graph: %d' % i)
-            print ('n_nodes:', n_nodes)
-            for n, data in G.get_graph().nodes(data=True):
-                print ('node:', n, data)
-            print (nx.to_edgelist(G.get_graph()))
+            print ('good graph: %d' % i)
+            #print ('n_nodes:', n_nodes)
+            #for n, data in G.get_graph().nodes(data=True):
+            #    print ('node:', n, data)
+            #print (nx.to_edgelist(G.get_graph()))
 
             # set the edge colors to indicate the dag critical path
             c_e = {}
@@ -214,6 +216,14 @@ if __name__ == "__main__":
 
             # save the dag critical path lenght into the dag for debug purporses
             G.get_graph().graph['critical_path_length'] = critical_length
+
+            # save the cpu load just to make sure that heavy loaded scenarios are also generated
+            total_cpu_load = 0.0
+            for n in G.get_graph():
+                # print (type(G.get_graph().nodes[n]['C']))
+                total_cpu_load += G.get_graph().nodes[n]['C']
+            #print ('CPU load:', total_cpu_load/G.get_graph_period())
+            G.get_graph().graph['cpu_load'] = total_cpu_load/G.get_graph_period()
 
             # select some tasks to be tagged as 'hardware accelerated', e.g. fpga or gpu
             # and randonly select a task from the critical path to be accelerated

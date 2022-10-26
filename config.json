@@ -1,26 +1,29 @@
 {
-  "misc": {
-    "multi-DAG": false,
-    "cores": 4,
-    "print_DAG": false,
-    "save_to_file": true,
-    "fname_prefix": "zcu102small",
-    "fname_int_sufix": 0,
-    "dummy_source_and_sink": false,
-    "rnd_seed": 1234
-  },
-  "single_task": {
-    "set_number": 10
-  },
-  "dag_config": {
-    "max_period":  100000000,
-    "max_bytes": 1,
-    "max_acc_tasks": 2,
-    "acc_ids": [1],
-    "random_non_scalable_C": false,
-    "parallelism": 3,
-    "layer_num_min": 3,
-    "layer_num_max": 4,
-    "connect_prob": 0.3
+    "misc": {
+      "multi-DAG": false,
+      "cores": 4,
+      "print_DAG": false,
+      "save_to_file": true,
+      "fname_prefix": "smallheavy",
+      "fname_int_sufix": 0,
+      "dummy_source_and_sink": false,
+      "rnd_seed": 1234
+    },
+    "single_task": {
+      "set_number": 10
+    },
+    "dag_config": {
+      "max_period":  100000000,
+      "max_cpu_load": 4.0,
+      "min_cpu_load": 3.0,
+      "max_bytes": 1,
+      "max_acc_tasks": 0,
+      "acc_ids": [],      
+      "random_non_scalable_C": false,
+      "parallelism": 3,
+      "layer_num_min": 3,
+      "layer_num_max": 4,
+      "connect_prob": 0.3
+    }
   }
-}
+  

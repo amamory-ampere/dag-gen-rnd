@@ -71,6 +71,8 @@ To generate single DAG task, set `multi-DAG`=`false`, then in `single_task`:
 When generating single DAGs:
 
  - `max_period`:  end to end period in ns,
+ - `max_cpu_load`: max cpu load. cpu load is the sum of all task runtime divided by the dag period
+ - `min_cpu_load`: min cpu load
  - `max_bytes`: max number of bytes send per message,
  - `max_acc_tasks`: max number of tasks to be randomized. ,
  - `acc_ids`: a list of int index for the accelerator island. For example, if the platform has one island of cpu and one island w acc, then the list is [1]. if there are two cpu islands (like big.little) and two accelarators, then the list is [2,3],
