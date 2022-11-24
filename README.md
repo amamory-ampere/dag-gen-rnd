@@ -74,9 +74,39 @@ When generating single DAGs:
  - `max_cpu_load`: max cpu load. cpu load is the sum of all task runtime divided by the dag period
  - `min_cpu_load`: min cpu load
  - `max_bytes`: max number of bytes send per message,
- - `max_acc_tasks`: max number of tasks to be randomized. ,
- - `acc_ids`: a list of int index for the accelerator island. For example, if the platform has one island of cpu and one island w acc, then the list is [1]. if there are two cpu islands (like big.little) and two accelarators, then the list is [2,3],
  - `random_non_scalable_C`: boolean indicating whether the non scalable part of C is randomized, up to 10% the size of C. If false, it will be zero.
+
+## hardware acceleration extension
+
+These are the extensions to represent hardware accelerated tasks, specially FPGA with dynamic partial reconfiguration support:
+
+ - `max_acc_tasks`: max number of tasks to be randomized.;
+ - `acc_ids`: a list of int index for the accelerator island. For example, if the platform has one island of cpu and one island w acc, then the list is [1]. if there are two cpu islands (like big.little) and two accelarators, then the list is [2,3];
+ - `acc_C`: a list of int representing the WCET of the hardware accelerated tasks;
+ - `reconf_us`: a list of int representing the Worst-Case time to configure the task partition. This time depends on the bitstream size.
+
+Here is an example where a single IP can be inserted up to twice in the DAG:
+
+```
+"fpga": {
+    "max_acc_tasks": 2,
+    "acc_ids": [100],
+    "acc_C": [5000],
+    "reconf_us": [1000]
+    }
+```
+
+And this is another example where again a DAG can have up two hw tasks, but in this case, there are two different tasks to be chosen. Each task with its ID, C, and reconfiguration time. Note that, in this example, both hw tasks have the same reconf time, meaning that these tasks most probaly share the same reconfigurable region, i.e., they are not run in parallel. 
+
+```
+"fpga": {
+    "max_acc_tasks": 2,
+    "bitstream_config_us": 1000,
+    "acc_ids": [100,101],
+    "acc_C": [5000,15000],
+    "reconf_us": [1000,1000]
+    }
+```
 
 ## Controling the DAG size
 

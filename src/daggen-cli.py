@@ -137,6 +137,7 @@ if __name__ == "__main__":
 
     # DAG config
     dag_config = config["dag_config"]
+    fpga = config["fpga"]
 
     ############################################################################
     # I. single DAG generation
@@ -178,7 +179,15 @@ if __name__ == "__main__":
             # print ('nodes:', n_nodes, type(c_))
             # for key,value in c_.items():
             #     print(key, ':', value)
-            
+
+            # select some tasks to be tagged as 'hardware accelerated', e.g. fpga or gpu
+            # and randonly select a task from the critical path to be accelerated
+            accelerated_tasks = random.randint(0, int(fpga["max_acc_tasks"]))
+            # cannot have more hw tasks than n_tasks + the start and end tasks
+            if (n_nodes<accelerated_tasks+2):
+                continue
+
+            # set tasks wcet
             nx.set_node_attributes(G.get_graph(), c_, 'C')
             nx.set_node_attributes(G.get_graph(), c_ns_, 'C_ns')
 
@@ -190,6 +199,38 @@ if __name__ == "__main__":
             # attribute 'label' is used to store # bytes sent due to dot. this will print te msg size when the dot is viewed
             nx.set_edge_attributes(G.get_graph(), w_e, 'label')
 
+            #print ('n_nodes:', n_nodes)
+            #for n, data in G.get_graph().nodes(data=True):
+            #    print ('node:', n, data)
+            #print (nx.to_edgelist(G.get_graph()))
+
+            acc_cnt =0
+            # remove the 1st and last tasks. these cannot be accelerated
+            node_set = set(G.get_graph().nodes())
+            node_set.remove(max(G.get_graph().nodes()))
+            node_set.remove(min(G.get_graph().nodes()))
+            assert(len(node_set)>=accelerated_tasks)
+            # keep tagging tasks as 'accelerated' until 
+            # accelerated_tasks were marked or all  tasks of the path were marked
+            while (acc_cnt < accelerated_tasks):
+                # randomly select the task to be replaced by an acc task
+                assert(len(node_set)>=0)
+                acc_task_id = random.choice(tuple(node_set))
+                # we dont want to select the same task again
+                node_set.remove(acc_task_id)
+                # randonly select which accelerator to be used, in case there are multiple accs
+                acc_idx = int(random.randint(0,len(fpga["acc_ids"])-1))
+                assert (len(fpga["acc_ids"]) == len(fpga["acc_C"]))
+                assert (len(fpga["acc_ids"]) == len(fpga["reconf_us"]))
+                G.get_graph().nodes[acc_task_id]['acc'] = fpga["acc_ids"][acc_idx]
+                # overwrite the initial random C by the actual C of the acc task
+                G.get_graph().nodes[acc_task_id]['C'] = fpga["acc_C"][acc_idx]
+                # time to reconfig this task. If multiple tasks share the same reconfigurable region
+                # they will have the same reconf time since the bitstream size is the same
+                G.get_graph().nodes[acc_task_id]['reconf_time'] = fpga["reconf_us"][acc_idx]
+
+                acc_cnt +=1
+
             # calculate the longest path assuming C
             [critical_length, critical_path] = longest_dag_path(G.get_graph())
             # print ('path:', critical_path, 'has lenght:',critical_length)
@@ -197,13 +238,6 @@ if __name__ == "__main__":
             if critical_length > G.get_graph_deadline():
                 # print ('bad graph')
                 continue
-            
-            # at this point, the graph has been approved. This is a good point to enable dgb msgs
-            print ('good graph: %d' % i)
-            #print ('n_nodes:', n_nodes)
-            #for n, data in G.get_graph().nodes(data=True):
-            #    print ('node:', n, data)
-            #print (nx.to_edgelist(G.get_graph()))
 
             # set the edge colors to indicate the dag critical path
             c_e = {}
@@ -225,25 +259,8 @@ if __name__ == "__main__":
             #print ('CPU load:', total_cpu_load/G.get_graph_period())
             G.get_graph().graph['cpu_load'] = total_cpu_load/G.get_graph_period()
 
-            # select some tasks to be tagged as 'hardware accelerated', e.g. fpga or gpu
-            # and randonly select a task from the critical path to be accelerated
-            accelerated_tasks = random.randint(0, int(dag_config["max_acc_tasks"]))
-            acc_cnt =0
-            # convert the list of tuple (v,t) to a set of int representing the tasks
-            critical_path_set = set(critical_path)
-            assert(len(critical_path_set) >= 3)
-            # remove the 1st and last tasks. these cannot be accelerated
-            critical_path_set.remove(max(critical_path_set))
-            critical_path_set.remove(min(critical_path_set))
-            #print('critical_path_set:', accelerated_tasks, critical_path_set)
-            # keep tagging tasks in the critical path as 'accelerated' until 
-            # accelerated_tasks were marked or all  tasks of the path were marked
-            while (acc_cnt < accelerated_tasks and acc_cnt < len(critical_path_set)):
-                acc_task_id = random.choice(tuple(critical_path_set))
-                #print ('acc_task_id:', acc_task_id)
-                # randonly select the accelerator id for this task
-                G.get_graph().nodes[acc_task_id]['acc'] = int(random.choice(tuple(dag_config["acc_ids"])))
-                acc_cnt +=1
+            # at this point, the graph has been approved. This is a good point to enable dgb msgs
+            print ('good graph: %d' % i)
 
             # print internal data
             if config["misc"]["print_DAG"]:
