@@ -182,7 +182,10 @@ if __name__ == "__main__":
 
             # select some tasks to be tagged as 'hardware accelerated', e.g. fpga or gpu
             # and randonly select a task from the critical path to be accelerated
-            accelerated_tasks = random.randint(0, int(fpga["max_acc_tasks"]))
+            if int(fpga["max_acc_tasks"]) > 0:
+                accelerated_tasks = random.randint(1, int(fpga["max_acc_tasks"]))
+            else:
+                accelerated_tasks = 0
             # cannot have more hw tasks than n_tasks + the start and end tasks
             if (n_nodes<accelerated_tasks+2):
                 continue
@@ -210,8 +213,7 @@ if __name__ == "__main__":
             node_set.remove(max(G.get_graph().nodes()))
             node_set.remove(min(G.get_graph().nodes()))
             assert(len(node_set)>=accelerated_tasks)
-            # keep tagging tasks as 'accelerated' until 
-            # accelerated_tasks were marked or all  tasks of the path were marked
+            # keep tagging tasks as 'accelerated' until accelerated_tasks were marked 
             while (acc_cnt < accelerated_tasks):
                 # randomly select the task to be replaced by an acc task
                 assert(len(node_set)>=0)
@@ -228,7 +230,6 @@ if __name__ == "__main__":
                 # time to reconfig this task. If multiple tasks share the same reconfigurable region
                 # they will have the same reconf time since the bitstream size is the same
                 G.get_graph().nodes[acc_task_id]['reconf_time'] = fpga["reconf_us"][acc_idx]
-
                 acc_cnt +=1
 
             # calculate the longest path assuming C
@@ -238,6 +239,8 @@ if __name__ == "__main__":
             if critical_length > G.get_graph_deadline():
                 # print ('bad graph')
                 continue
+            # save the dag critical path lenght into the dag for debug purporses
+            G.get_graph().graph['critical_path_length'] = critical_length
 
             # set the edge colors to indicate the dag critical path
             c_e = {}
@@ -248,10 +251,8 @@ if __name__ == "__main__":
                     c_e[e] = 'black'
             nx.set_edge_attributes(G.get_graph(), c_e, 'color')
 
-            # save the dag critical path lenght into the dag for debug purporses
-            G.get_graph().graph['critical_path_length'] = critical_length
-
             # save the cpu load just to make sure that heavy loaded scenarios are also generated
+            # note that also the hw tasks are being accounted as 'cpu_load'
             total_cpu_load = 0.0
             for n in G.get_graph():
                 # print (type(G.get_graph().nodes[n]['C']))
