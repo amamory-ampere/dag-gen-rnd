@@ -177,19 +177,25 @@ if __name__ == "__main__":
             else:
                 c_ns_ = {key: 0 for key, value in c_.items()}
             # print ('nodes:', n_nodes, type(c_))
-            # for key,value in c_.items():
-            #     print(key, ':', value)
+
+            # Linux does not support tasks shorter than 1024 us
+            for key,value in c_.items():
+                # print(key, ':', value)
+                if value < 1024000:
+                    continue
 
             # select some tasks to be tagged as 'hardware accelerated', e.g. fpga or gpu
             # and randonly select a task from the critical path to be accelerated
-            if int(fpga["max_acc_tasks"]) > 0:
+            if "max_acc_tasks" in fpga and int(fpga["max_acc_tasks"]) > 0:
                 accelerated_tasks = random.randint(1, int(fpga["max_acc_tasks"]))
+            # in this case, the number of hw tasks is not randomized, but given
+            elif "hw_tasks" in fpga:
+                accelerated_tasks = int(fpga["hw_tasks"])
             else:
                 accelerated_tasks = 0
             # cannot have more hw tasks than n_tasks + the start and end tasks
             if (n_nodes<accelerated_tasks+2):
                 continue
-
             # set tasks wcet
             nx.set_node_attributes(G.get_graph(), c_, 'C')
             nx.set_node_attributes(G.get_graph(), c_ns_, 'C_ns')
@@ -207,30 +213,46 @@ if __name__ == "__main__":
             #    print ('node:', n, data)
             #print (nx.to_edgelist(G.get_graph()))
 
-            acc_cnt =0
+            hw_cnt =0
             # remove the 1st and last tasks. these cannot be accelerated
             node_set = set(G.get_graph().nodes())
             node_set.remove(max(G.get_graph().nodes()))
             node_set.remove(min(G.get_graph().nodes()))
             assert(len(node_set)>=accelerated_tasks)
+            assert (len(fpga["hw_idx"]) == len(fpga["hw_name"]))
+            assert (len(fpga["hw_idx"]) == len(fpga["sw_C"]))
+            assert (len(fpga["hw_idx"]) == len(fpga["hw_C"]))
+            assert (len(fpga["hw_idx"]) == len(fpga["hw_idle_power"]))
+            assert (len(fpga["hw_idx"]) == len(fpga["hw_busy_power"]))
+            assert (len(fpga["hw_idx"]) == len(fpga["reconf_us"]))
             # keep tagging tasks as 'accelerated' until accelerated_tasks were marked 
-            while (acc_cnt < accelerated_tasks):
-                # randomly select the task to be replaced by an acc task
+            while (hw_cnt < accelerated_tasks):
+                # randomly select the task to be replaced by an hw task
                 assert(len(node_set)>=0)
-                acc_task_id = random.choice(tuple(node_set))
+                chosen_task_id = random.choice(tuple(node_set))
                 # we dont want to select the same task again
-                node_set.remove(acc_task_id)
-                # randonly select which accelerator to be used, in case there are multiple accs
-                acc_idx = int(random.randint(0,len(fpga["acc_ids"])-1))
-                assert (len(fpga["acc_ids"]) == len(fpga["acc_C"]))
-                assert (len(fpga["acc_ids"]) == len(fpga["reconf_us"]))
-                G.get_graph().nodes[acc_task_id]['acc'] = fpga["acc_ids"][acc_idx]
-                # overwrite the initial random C by the actual C of the acc task
-                G.get_graph().nodes[acc_task_id]['C'] = fpga["acc_C"][acc_idx]
+                node_set.remove(chosen_task_id)
+                if "hw_tasks" in fpga:
+                    # if 'hw_tasks' is used, then the hw tasks are not randomly selected
+                    hw_idx = hw_cnt
+                else:
+                    # randonly select which accelerator to be used, in case there are multiple accs
+                    hw_idx = int(random.randint(0,len(fpga["hw_idx"])-1))
+                G.get_graph().nodes[chosen_task_id]['hw_idx'] = fpga["hw_idx"][hw_idx]
+                # Replace the sw wcet . make sure max_period is +- in the same 'scale' of sw_C
+                # For instance, if sw_C is 2 ms, dont expect to see some impact running on a dag w a deadline of 100 ms
+                # The rule of thumb is to have sw_C/hw_C ate least 10% or 20% of the dag deadline
+                G.get_graph().nodes[chosen_task_id]['C'] = fpga["sw_C"][hw_idx]
+                # we keep the C related to the equivalent sw implementation and add hw_C of the hw task
+                G.get_graph().nodes[chosen_task_id]['hw_C'] = fpga["hw_C"][hw_idx]
+                G.get_graph().nodes[chosen_task_id]['hw_idle_power'] = fpga["hw_idle_power"][hw_idx]
+                G.get_graph().nodes[chosen_task_id]['hw_busy_power'] = fpga["hw_busy_power"][hw_idx]
                 # time to reconfig this task. If multiple tasks share the same reconfigurable region
                 # they will have the same reconf time since the bitstream size is the same
-                G.get_graph().nodes[acc_task_id]['reconf_time'] = fpga["reconf_us"][acc_idx]
-                acc_cnt +=1
+                G.get_graph().nodes[chosen_task_id]['reconf_time'] = fpga["reconf_us"][hw_idx]
+                # makes the hw task more visible
+                G.get_graph().nodes[chosen_task_id]['shape'] = 'box'
+                hw_cnt +=1
 
             # calculate the longest path assuming C
             [critical_length, critical_path] = longest_dag_path(G.get_graph())

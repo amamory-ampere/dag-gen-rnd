@@ -4,16 +4,16 @@
       "cores": 4,
       "print_DAG": false,
       "save_to_file": true,
-      "fname_prefix": "zcu102medium",
+      "fname_prefix": "zcu102mat64.mat128.",
       "fname_int_sufix": 0,
       "dummy_source_and_sink": false,
       "rnd_seed": 1234
     },
     "single_task": {
-      "set_number": 50
+      "set_number": 10
     },
     "dag_config": {
-      "max_period":  100000000,
+      "max_period":  80000000,
       "max_cpu_load": 2.5,
       "min_cpu_load": 1.0,
       "max_bytes": 1,
@@ -24,10 +24,14 @@
       "connect_prob": 0.3
     },
     "fpga": {
-        "max_acc_tasks": 2,
-        "acc_ids": [100,101],
-        "acc_C": [5000000,15000000],
-        "reconf_us": [2000000,2000000]
+        "hw_tasks": 2,
+        "hw_idx": [101,100],
+        "hw_name": ["mat128","mat64"],
+        "sw_C": [36333000,2807000],
+        "hw_C": [ 4489000,1323000],
+        "hw_idle_power": [1.14,0.88],
+        "hw_busy_power": [1.19,0.9],
+        "reconf_us": [27696000,27696000]
       }
 
 }

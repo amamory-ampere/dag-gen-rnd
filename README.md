@@ -81,8 +81,9 @@ When generating single DAGs:
 These are the extensions to represent hardware accelerated tasks, specially FPGA with dynamic partial reconfiguration support:
 
  - `max_acc_tasks`: max number of tasks to be randomized.;
- - `acc_ids`: a list of int index for the accelerator island. For example, if the platform has one island of cpu and one island w acc, then the list is [1]. if there are two cpu islands (like big.little) and two accelarators, then the list is [2,3];
- - `acc_C`: a list of int representing the WCET of the hardware accelerated tasks;
+ - `hw_idx`: a list of int index for the accelerator island. For example, if the platform has one island of cpu and one island w acc, then the list is [1]. if there are two cpu islands (like big.little) and two accelarators, then the list is [2,3];
+ - `hw_C`: a list of int representing the WCET of the hardware accelerated tasks;
+ - `sw_C`: is the same as the previous one, but for the software counterpart such that the speedup for hardware acceleration is defined as `hw_C/sw_C`;
  - `reconf_us`: a list of int representing the Worst-Case time to configure the task partition. This time depends on the bitstream size.
 
 Here is an example where a single IP can be inserted up to twice in the DAG:
@@ -90,8 +91,8 @@ Here is an example where a single IP can be inserted up to twice in the DAG:
 ```
 "fpga": {
     "max_acc_tasks": 2,
-    "acc_ids": [100],
-    "acc_C": [5000],
+    "hw_idx": [100],
+    "hw_C": [5000],
     "reconf_us": [1000]
     }
 ```
@@ -102,11 +103,28 @@ And this is another example where again a DAG can have up two hw tasks, but in t
 "fpga": {
     "max_acc_tasks": 2,
     "bitstream_config_us": 1000,
-    "acc_ids": [100,101],
-    "acc_C": [5000,15000],
+    "hw_idx": [100,101],
+    "hw_C": [5000,15000],
     "reconf_us": [1000,1000]
     }
 ```
+
+When `hw_tasks` is used instead of `max_acc_tasks`, then there is no randomization for chosing the number of IPs and which IPs are placed. Take the following example:
+
+    "fpga": {
+        "hw_tasks": 2,
+        "hw_idx": [101,100],
+        "hw_name": ["mat128","mat64"],
+        "sw_C": [36333000,2807000],
+        "hw_C": [ 4489000,1323000],
+        "hw_idle_power": [1.14,0.88],
+        "hw_busy_power": [1.19,0.9],
+        "reconf_us": [27696000,27696000]
+      }
+
+This example says that each DAG must have two IPs where the first one is IP mat128 and the second one is IP mat64. The only randomization happens when chosing the DAG node representing the IPs.
+
+Note that the parameters `hw_name`, `hw_idle_power`, `hw_busy_power` are currently not being used but they will be important when supporting custom hardware designs for dag.c.
 
 ## Controling the DAG size
 
