@@ -179,10 +179,14 @@ if __name__ == "__main__":
             # print ('nodes:', n_nodes, type(c_))
 
             # Linux does not support tasks shorter than 1024 us
+            too_short_task=False
             for key,value in c_.items():
                 # print(key, ':', value)
                 if value < 1024000:
-                    continue
+                    too_short_task=True
+                    break
+            if too_short_task:
+                continue
 
             # select some tasks to be tagged as 'hardware accelerated', e.g. fpga or gpu
             # and randonly select a task from the critical path to be accelerated
