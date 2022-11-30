@@ -137,7 +137,16 @@ if __name__ == "__main__":
 
     # DAG config
     dag_config = config["dag_config"]
-    fpga = config["fpga"]
+    fpga = None
+    if "fpga" in config:
+        fpga = config["fpga"]
+        assert (len(fpga["hw_idx"]) == len(fpga["hw_name"]))
+        assert (len(fpga["hw_idx"]) == len(fpga["sw_C"]))
+        assert (len(fpga["hw_idx"]) == len(fpga["hw_C"]))
+        assert (len(fpga["hw_idx"]) == len(fpga["hw_idle_power"]))
+        assert (len(fpga["hw_idx"]) == len(fpga["hw_busy_power"]))
+        assert (len(fpga["hw_idx"]) == len(fpga["reconf_us"]))
+
 
     ############################################################################
     # I. single DAG generation
@@ -190,13 +199,13 @@ if __name__ == "__main__":
 
             # select some tasks to be tagged as 'hardware accelerated', e.g. fpga or gpu
             # and randonly select a task from the critical path to be accelerated
-            if "max_acc_tasks" in fpga and int(fpga["max_acc_tasks"]) > 0:
-                accelerated_tasks = random.randint(1, int(fpga["max_acc_tasks"]))
-            # in this case, the number of hw tasks is not randomized, but given
-            elif "hw_tasks" in fpga:
-                accelerated_tasks = int(fpga["hw_tasks"])
-            else:
-                accelerated_tasks = 0
+            accelerated_tasks = 0
+            if fpga != None:
+                if "max_acc_tasks" in fpga and int(fpga["max_acc_tasks"]) > 0:
+                    accelerated_tasks = random.randint(1, int(fpga["max_acc_tasks"]))
+                # in this case, the number of hw tasks is not randomized, but given
+                elif "hw_tasks" in fpga:
+                    accelerated_tasks = int(fpga["hw_tasks"])
             # cannot have more hw tasks than n_tasks + the start and end tasks
             if (n_nodes<accelerated_tasks+2):
                 continue
@@ -223,12 +232,6 @@ if __name__ == "__main__":
             node_set.remove(max(G.get_graph().nodes()))
             node_set.remove(min(G.get_graph().nodes()))
             assert(len(node_set)>=accelerated_tasks)
-            assert (len(fpga["hw_idx"]) == len(fpga["hw_name"]))
-            assert (len(fpga["hw_idx"]) == len(fpga["sw_C"]))
-            assert (len(fpga["hw_idx"]) == len(fpga["hw_C"]))
-            assert (len(fpga["hw_idx"]) == len(fpga["hw_idle_power"]))
-            assert (len(fpga["hw_idx"]) == len(fpga["hw_busy_power"]))
-            assert (len(fpga["hw_idx"]) == len(fpga["reconf_us"]))
             # keep tagging tasks as 'accelerated' until accelerated_tasks were marked 
             while (hw_cnt < accelerated_tasks):
                 # randomly select the task to be replaced by an hw task
